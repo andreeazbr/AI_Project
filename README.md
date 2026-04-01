@@ -1,3 +1,6 @@
+## 📌 Project Type
+Academic project – Data Analysis & Machine Learning
+
 # Adult Income Dataset – Exploratory Data Analysis (EDA)
 
 This project focuses on the exploratory data analysis and preprocessing of the **Adult dataset** from the UCI Machine Learning Repository.  
