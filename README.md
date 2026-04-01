@@ -1,5 +1,5 @@
 ## 📌 Project Type
-Academic project – Data Analysis & Machine Learning
+Academic project – Artficial Intelligence & Machine Learning
 
 # Adult Income Dataset – Exploratory Data Analysis (EDA)
 
