@@ -149,3 +149,74 @@ for col in cat_cols:
 print("\n--- Verificare după curățare/imputare ---")
 print("Total valori lipsă rămase în X:", int(X.isna().sum().sum()))
 print("Dimensiune după eliminare duplicate:", X.shape, y.shape)
+
+# partea 4a
+
+# selectare coloane numerice
+num_cols = X.select_dtypes(include=["int64", "float64"]).columns
+
+print("Trăsături numerice:", list(num_cols))
+
+desc_stats = X[num_cols].describe()
+
+# eliminare notație științifică
+pd.set_option("display.float_format", "{:.2f}".format)
+
+# afișare toate coloanele
+pd.set_option("display.max_columns", None)
+
+# statistici rotunjite
+desc_stats = X[num_cols].describe().round(2)
+
+print("\n--- Statistici descriptive (formatate) ---")
+print(desc_stats)
+desc_stats = X[num_cols].describe().round(2)
+desc_stats.to_excel("statistici_numerice.xlsx") #asta este ca sa am tabelul deja facut, se comenteaza sau se sterge fisierul cand rulez iar
+
+std_values = desc_stats.loc["std"].sort_values(ascending=False)
+
+top_15 = std_values.head(15).index
+
+print("\nPrimele trăsături cu deviația standard cea mai mare:")
+print(list(top_15))
+
+for col in top_15:
+    plt.figure()
+    plt.hist(X[col], bins=30)
+    plt.title(f"Histogramă - {col}")
+    plt.xlabel(col)
+    plt.ylabel("Frecvență")
+    plt.tight_layout()
+    plt.show()
+
+print("\n--- Detectare outlieri (IQR) ---")
+
+outlier_dict = {}
+
+for col in num_cols:
+    Q1 = X[col].quantile(0.25)
+    Q3 = X[col].quantile(0.75)
+    IQR = Q3 - Q1
+
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    outliers = X[(X[col] < lower_bound) | (X[col] > upper_bound)][col]
+    outlier_count = len(outliers)
+
+    outlier_dict[col] = outlier_count
+
+# transformare în DataFrame
+outlier_df = pd.DataFrame(
+    outlier_dict.items(),
+    columns=["Trăsătură", "Număr outliere"]
+)
+
+# sortare descrescător
+outlier_df = outlier_df.sort_values(by="Număr outliere", ascending=False)
+outlier_df["Procent (%)"] = (outlier_df["Număr outliere"] / len(X) * 100).round(2)
+
+print("\n--- Outliere sortate descrescător ---")
+print(outlier_df)
+outlier_df.to_excel("outliere.xlsx") # tot pt afisare
+
