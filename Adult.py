@@ -79,6 +79,7 @@ minority_pct = percents.min()
 majority_pct = percents.max()
 
 # nu exista un prag universal, acesta este cel pe care l-am ales eu
+
 if majority_pct >= 70:
     concluzie = "Dataset dezechilibrat (clasa majoritară ≥ 70%)."
 elif majority_pct >= 60:
