@@ -148,6 +148,13 @@ The encoding is **not applied yet**, but the following strategy is proposed:
 
 ---
 
+## 📄 Report
+
+The full analysis report is available here:  
+📎 Raport.pdf
+
+---
+
 ## 👩‍💻 Author
 
 Andreea Zbranca
