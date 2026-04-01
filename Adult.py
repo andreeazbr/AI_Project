@@ -2,6 +2,7 @@ from ucimlrepo import fetch_ucirepo
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 
 # fetch dataset
 adult = fetch_ucirepo(id=2)
@@ -220,3 +221,47 @@ print("\n--- Outliere sortate descrescător ---")
 print(outlier_df)
 outlier_df.to_excel("outliere.xlsx") # tot pt afisare
 
+# partea 4b
+
+# selectare trăsături categoriale
+cat_cols = X.select_dtypes(include=["object", "string"]).columns.tolist()
+
+print("\nTrăsături categoriale:", cat_cols)
+
+summary_rows = []
+
+for col in cat_cols:
+    n_categories = X[col].nunique()
+    summary_rows.append({
+        "Trăsătură": col,
+        "Număr categorii": n_categories
+    })
+
+cat_summary_df = pd.DataFrame(summary_rows)
+
+# sortare descrescător după număr categorii
+cat_summary_df = cat_summary_df.sort_values(
+    by="Număr categorii",
+    ascending=False
+)
+
+print("\n--- Număr categorii pentru fiecare trăsătură categorială ---")
+print(cat_summary_df)
+cat_summary_df.to_excel("categorii.xlsx")
+
+for col in cat_cols:
+    print(f"\n=== Distribuția categoriilor pentru '{col}' ===")
+    counts = X[col].value_counts()
+    percents = X[col].value_counts(normalize=True) * 100
+    dist_table = pd.DataFrame({
+        "Număr instanțe": counts,
+        "Procent (%)": percents.round(2)
+    })
+
+    # sortare descrescător după număr instanțe
+    dist_table = dist_table.sort_values(
+        by="Număr instanțe",
+        ascending=False
+    )
+
+    print(dist_table)
