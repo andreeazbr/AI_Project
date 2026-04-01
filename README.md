@@ -51,8 +51,8 @@ The following preprocessing steps were applied:
 
 ### 🔹 Target Distribution
 - Significant class imbalance:
-  - <=50K → ~76%
-  - >50K → ~24%
+  - <= 50K → ~76%
+  - > 50K → ~24%
 
 ### 🔹 Numerical Features
 - Descriptive statistics computed (mean, std, quartiles)
