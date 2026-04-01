@@ -88,3 +88,64 @@ else:
     concluzie = "Dataset relativ echilibrat (clase apropiate ca proporție)."
 
 print("\nConcluzie:", concluzie)
+
+# partea 3
+
+X = X.replace("?", np.nan) # inlocuire
+
+# tabel
+missing_count = X.isna().sum()
+missing_percent = (missing_count / len(X)) * 100
+
+missing_table = pd.DataFrame({
+    "Valori lipsă (număr)": missing_count,
+    "Valori lipsă (%)": missing_percent.round(2)
+}).sort_values("Valori lipsă (număr)", ascending=False)
+
+print("\n--- Valori lipsă pe trăsături (număr și procent) ---")
+print(missing_table)
+
+num_features_with_missing = (missing_count > 0).sum()
+print(f"\nNumăr trăsături cu valori lipsă: {num_features_with_missing} din {X.shape[1]}")
+
+# verificare duplicate
+X = X.reset_index(drop=True)
+y = y.reset_index(drop=True)
+df_full = pd.concat([X, y], axis=1)
+
+dup_count = df_full.duplicated().sum()
+dup_percent = (dup_count / len(df_full)) * 100
+
+print("\n--- Duplicate ---")
+print(f"Instanțe duplicate (număr): {dup_count}")
+print(f"Instanțe duplicate (%): {dup_percent:.2f}")
+
+# eliminare duplicate
+df_full = df_full.drop_duplicates().reset_index(drop=True)
+
+# Separăm înapoi X și y
+X = df_full.drop(columns=y.columns)
+y = df_full[y.columns]
+
+# Imputare valori lipsă:
+# - numeric: mediană
+# - categorial:  (cel mai frecvent)
+num_cols = X.select_dtypes(include=["int64", "float64"]).columns
+cat_cols = X.select_dtypes(include=["object", "string"]).columns
+
+# imputare numerică cu mediana
+for col in num_cols:
+    med = X[col].median()
+    X[col] = pd.to_numeric(X[col], errors="coerce")
+    X[col] = X[col].fillna(med)
+
+# imputare categorială cu cea mai frecvenat categorie
+for col in cat_cols:
+    mode = X[col].mode(dropna=True)
+    fill_value = mode.iloc[0] if len(mode) > 0 else "Unknown"
+    X[col] = X[col].fillna(fill_value)
+
+# verificare finală
+print("\n--- Verificare după curățare/imputare ---")
+print("Total valori lipsă rămase în X:", int(X.isna().sum().sum()))
+print("Dimensiune după eliminare duplicate:", X.shape, y.shape)
