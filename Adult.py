@@ -17,7 +17,7 @@ print(adult.metadata)
 # variable information
 print(adult.variables)
 
-# aici incepe codul meu, respectiv partea 1
+# aici incepe codul meu, respectiv partea 1 - Descrierea setului de date si a variabilei tinta
 
 print("X shape (instante, trasaturi):", X.shape)
 print("y shape:", y.shape)
@@ -42,7 +42,7 @@ print("Etichete income (după codificare):", y['income'].unique())
 # am spatii si in variabilele categoriale, acestea trebuie eliminate
 X = X.apply(lambda col: col.str.strip() if col.dtype in ["object", "string"] else col)
 
-# partea 2
+# partea 2 - Distributia claselor
 
 # nr de instante pe clasa + procente
 counts = y['income'].value_counts()
@@ -90,7 +90,7 @@ else:
 
 print("\nConcluzie:", concluzie)
 
-# partea 3
+# partea 3 - Identificarea valorilor lipsa si a problemelor de calitate
 
 X = X.replace("?", np.nan) # inlocuire
 
@@ -151,7 +151,7 @@ print("\n--- Verificare după curățare/imputare ---")
 print("Total valori lipsă rămase în X:", int(X.isna().sum().sum()))
 print("Dimensiune după eliminare duplicate:", X.shape, y.shape)
 
-# partea 4a
+# partea 4a - Analiza trasaturilor numerice
 
 # selectare coloane numerice
 num_cols = X.select_dtypes(include=["int64", "float64"]).columns
@@ -221,7 +221,7 @@ print("\n--- Outliere sortate descrescător ---")
 print(outlier_df)
 outlier_df.to_excel("outliere.xlsx") # tot pt afisare
 
-# partea 4b
+# partea 4b - Analiza trasaturilor categoriale
 
 # selectare trăsături categoriale
 cat_cols = X.select_dtypes(include=["object", "string"]).columns.tolist()
@@ -265,3 +265,72 @@ for col in cat_cols:
     )
 
     print(dist_table)
+
+    # partea 5 - Relatia dintre trasaturi si target
+
+    # selectare trăsături numerice
+    num_cols = X.select_dtypes(include=["int64", "float64"]).columns
+
+    print("\nTrăsături numerice:", list(num_cols))
+
+    # combinăm X și y
+    df_corr = pd.concat([X[num_cols], y], axis=1)
+
+    # matrice de corelație
+    corr_matrix = df_corr.corr()
+
+    print("\nMatricea de corelație:")
+    print(corr_matrix)
+
+    plt.figure(figsize=(8, 6))
+
+    sns.heatmap(
+        corr_matrix,
+        annot=True,
+        cmap="coolwarm",
+        center=0,
+        fmt=".2f",
+        linewidths=0.5,
+        vmin=-1,
+        vmax=1
+    )
+
+    plt.title("Matricea de corelație între trăsăturile numerice și income")
+
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
+
+    plt.tight_layout()
+
+    plt.show()
+
+    target_corr = corr_matrix["income"].drop("income")
+
+    # sortare după valoarea absolută
+    target_corr = target_corr.reindex(
+        target_corr.abs().sort_values(ascending=False).index
+    )
+
+    print("\nCorelația trăsăturilor numerice cu income:")
+    print(target_corr)
+
+    top_features = target_corr.head(3).index
+
+    print("\nCele mai informative trăsături:", list(top_features))
+
+    for feature in top_features:
+        plt.figure(figsize=(6, 4))
+        sns.histplot(
+            data=df_corr,
+            x=feature,
+            hue="income",
+            bins=30,
+            kde=False,
+            multiple="dodge"
+        )
+
+        plt.title(f"Distribuția variabilei {feature} în funcție de income")
+        plt.xlabel(feature)
+        plt.ylabel("Număr instanțe")
+
+        plt.show()
