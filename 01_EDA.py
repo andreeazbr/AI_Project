@@ -263,74 +263,72 @@ for col in cat_cols:
         by="Număr instanțe",
         ascending=False
     )
+print(dist_table)
 
-    print(dist_table)
+# partea 5 - Relatia dintre trasaturi si target
 
-    # partea 5 - Relatia dintre trasaturi si target
+# selectare trăsături numerice
+num_cols = X.select_dtypes(include=["int64", "float64"]).columns
+print("\nTrăsături numerice:", list(num_cols))
 
-    # selectare trăsături numerice
-    num_cols = X.select_dtypes(include=["int64", "float64"]).columns
+# combinăm X și y
+df_corr = pd.concat([X[num_cols], y], axis=1)
 
-    print("\nTrăsături numerice:", list(num_cols))
+# matrice de corelație
+corr_matrix = df_corr.corr()
 
-    # combinăm X și y
-    df_corr = pd.concat([X[num_cols], y], axis=1)
+print("\nMatricea de corelație:")
+print(corr_matrix)
 
-    # matrice de corelație
-    corr_matrix = df_corr.corr()
+plt.figure(figsize=(8, 6))
 
-    print("\nMatricea de corelație:")
-    print(corr_matrix)
+sns.heatmap(
+     corr_matrix,
+     annot=True,
+     cmap="coolwarm",
+     center=0,
+     fmt=".2f",
+     linewidths=0.5,
+     vmin=-1,
+     vmax=1
+)
 
-    plt.figure(figsize=(8, 6))
+plt.title("Matricea de corelație între trăsăturile numerice și income")
 
-    sns.heatmap(
-        corr_matrix,
-        annot=True,
-        cmap="coolwarm",
-        center=0,
-        fmt=".2f",
-        linewidths=0.5,
-        vmin=-1,
-        vmax=1
-    )
+plt.xticks(rotation=45)
+plt.yticks(rotation=0)
 
-    plt.title("Matricea de corelație între trăsăturile numerice și income")
+plt.tight_layout()
 
-    plt.xticks(rotation=45)
-    plt.yticks(rotation=0)
+plt.show()
 
-    plt.tight_layout()
+target_corr = corr_matrix["income"].drop("income")
 
-    plt.show()
+# sortare după valoarea absolută
+target_corr = target_corr.reindex(
+target_corr.abs().sort_values(ascending=False).index
+)
 
-    target_corr = corr_matrix["income"].drop("income")
+print("\nCorelația trăsăturilor numerice cu income:")
+print(target_corr)
 
-    # sortare după valoarea absolută
-    target_corr = target_corr.reindex(
-        target_corr.abs().sort_values(ascending=False).index
-    )
+top_features = target_corr.head(3).index
 
-    print("\nCorelația trăsăturilor numerice cu income:")
-    print(target_corr)
+print("\nCele mai informative trăsături:", list(top_features))
 
-    top_features = target_corr.head(3).index
+for feature in top_features:
+   plt.figure(figsize=(6, 4))
+   sns.histplot(
+        data=df_corr,
+        x=feature,
+        hue="income",
+        bins=30,
+        kde=False,
+        multiple="dodge"
+   )
 
-    print("\nCele mai informative trăsături:", list(top_features))
+plt.title(f"Distribuția variabilei {feature} în funcție de income")
+plt.xlabel(feature)
+plt.ylabel("Număr instanțe")
 
-    for feature in top_features:
-        plt.figure(figsize=(6, 4))
-        sns.histplot(
-            data=df_corr,
-            x=feature,
-            hue="income",
-            bins=30,
-            kde=False,
-            multiple="dodge"
-        )
-
-        plt.title(f"Distribuția variabilei {feature} în funcție de income")
-        plt.xlabel(feature)
-        plt.ylabel("Număr instanțe")
-
-        plt.show()
+plt.show()
