@@ -9,7 +9,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
-
 class RareCategoryGrouper(BaseEstimator, TransformerMixin):
 
     def __init__(self, threshold=0.01, other_label="Other"):
