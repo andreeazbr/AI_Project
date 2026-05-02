@@ -7,10 +7,6 @@ from preprocessing_utils import load_and_preprocess_data
 from xgboost import XGBClassifier
 
 from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
     confusion_matrix,
     classification_report
 )
@@ -49,7 +45,7 @@ def evaluate_model(model, X_test, y_test, experiment_name, save_outputs=True):
         target_names=["<=50K", ">50K"],
         output_dict=True
     )
-    print("\nRaport de clasificare:")
+    print(f"\nRaport de clasificare pentru {experiment_name}:")
     report_df = pd.DataFrame(report).transpose()
     print(report_df.round(4))
 
@@ -87,6 +83,8 @@ print("X_test_processed:", X_test_processed.shape)
 print("y_train:", y_train.shape)
 print("y_test:", y_test.shape)
 
+all_results = []
+
 baseline_model = XGBClassifier(
     random_state=42,
     eval_metric="logloss"
@@ -101,8 +99,36 @@ baseline_results = evaluate_model(
     experiment_name="Experiment 0 Baseline XGBoost"
 )
 
-results_df = pd.DataFrame([baseline_results])
-print("\nRezultate sumar:")
+all_results.append(baseline_results)
+
+max_depth_values = [3, 6, 10]
+
+for depth in max_depth_values:
+    model = XGBClassifier(
+        max_depth=depth,
+        random_state=42,
+        eval_metric="logloss"
+    )
+
+    model.fit(X_train_processed, y_train)
+
+    result = evaluate_model(
+        model=model,
+        X_test=X_test_processed,
+        y_test=y_test,
+        experiment_name=f"Experiment 1 max_depth {depth}",
+        save_outputs=False
+    )
+
+    result["max_depth"] = depth
+    result["n_estimators"] = "default"
+    result["learning_rate"] = "default"
+
+    all_results.append(result)
+
+results_df = pd.DataFrame(all_results)
+
+print("\nRezultate comparative:")
 print(results_df.round(4))
 
 results_df.round(4).to_excel(
