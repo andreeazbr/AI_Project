@@ -253,3 +253,108 @@ experiment_3_df[selected_columns].round(4).to_excel(
     index=False
 )
 
+feature_importances = baseline_model.feature_importances_
+
+importance_df = pd.DataFrame({
+    "feature": feature_names,
+    "importance": feature_importances
+})
+
+importance_df = importance_df.sort_values(
+    by="importance",
+    ascending=False
+)
+
+print("\nTop 15 caracteristici după importanța în modelul XGBoost:")
+print(importance_df.head(15).round(4))
+
+importance_df.round(4).to_excel(
+    "outputs/feature_importance_xgboost.xlsx",
+    index=False
+)
+
+top_features = importance_df.head(15)
+
+plt.figure(figsize=(8, 6))
+
+sns.barplot(
+    data=top_features,
+    x="importance",
+    y="feature"
+)
+
+plt.title("Top 15 Feature Importances - XGBoost")
+plt.xlabel("Importance")
+plt.ylabel("Feature")
+plt.tight_layout()
+
+plt.savefig(
+    "outputs/feature_importance_xgboost.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+def get_original_feature_name(feature_name):
+    original_features = [
+        "age",
+        "fnlwgt",
+        "education-num",
+        "capital-gain",
+        "capital-loss",
+        "hours-per-week",
+        "workclass",
+        "education",
+        "marital-status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native-country"
+    ]
+
+    for original_feature in original_features:
+        if feature_name == original_feature or feature_name.startswith(original_feature + "_"):
+            return original_feature
+
+    return feature_name
+
+
+importance_df["original_feature"] = importance_df["feature"].apply(get_original_feature_name)
+
+aggregated_importance_df = (
+    importance_df
+    .groupby("original_feature", as_index=False)["importance"]
+    .sum()
+    .sort_values(by="importance", ascending=False)
+)
+
+print("\nImportanța agregată pe trăsături originale:")
+print(aggregated_importance_df.round(4))
+
+aggregated_importance_df.round(4).to_excel(
+    "outputs/feature_importance_xgboost_aggregated.xlsx",
+    index=False
+)
+
+plt.figure(figsize=(8, 6))
+
+sns.barplot(
+    data=aggregated_importance_df,
+    x="importance",
+    y="original_feature"
+)
+
+plt.title("Feature Importance Aggregated by Original Feature - XGBoost")
+plt.xlabel("Importance")
+plt.ylabel("Original feature")
+plt.tight_layout()
+
+plt.savefig(
+    "outputs/feature_importance_xgboost_aggregated.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
