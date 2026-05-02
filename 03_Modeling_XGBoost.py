@@ -1,3 +1,6 @@
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from preprocessing_utils import load_and_preprocess_data
 
 from xgboost import XGBClassifier
@@ -10,6 +13,7 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report
 )
+
 
 X_train_processed, X_test_processed, y_train, y_test, preprocessor, feature_names = (
     load_and_preprocess_data()
@@ -48,6 +52,23 @@ print(f"F1-score:  {f1:.4f}")
 print("\nMatrice de confuzie:")
 cm = confusion_matrix(y_test, y_pred)
 print(cm)
+
+plt.figure(figsize=(5, 4))
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt='d',
+    cmap='Blues',
+    xticklabels=['<=50K', '>50K'],
+    yticklabels=['<=50K', '>50K']
+)
+
+plt.title("Confusion Matrix for the Baseline XGBoost Model")
+plt.xlabel("Predicted class")
+plt.ylabel("Actual class")
+plt.tight_layout()
+plt.savefig("confusion_matrix.png", dpi=300, bbox_inches="tight")
+plt.show()
 
 print("\nRaport de clasificare:")
 print(classification_report(y_test, y_pred))
