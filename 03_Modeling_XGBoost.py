@@ -11,33 +11,38 @@ from sklearn.metrics import (
     classification_report
 )
 
+def make_file_name(text):
+    return text.lower().replace(" ", "_").replace("-", "_")
+
 def evaluate_model(model, X_test, y_test, experiment_name, save_outputs=True):
     y_pred = model.predict(X_test)
 
     cm = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(5, 4))
-    sns.heatmap(
-        cm,
-        annot=True,
-        fmt="d",
-        cmap="Blues",
-        xticklabels=["<=50K", ">50K"],
-        yticklabels=["<=50K", ">50K"]
-    )
-
-    plt.title(f"Confusion Matrix - {experiment_name}")
-    plt.xlabel("Predicted class")
-    plt.ylabel("Actual class")
-    plt.tight_layout()
 
     if save_outputs:
-        file_name = experiment_name.lower().replace(" ", "_").replace("-", "_")
+        plt.figure(figsize=(5, 4))
+        sns.heatmap(
+            cm,
+            annot=True,
+            fmt="d",
+            cmap="Blues",
+            xticklabels=["<=50K", ">50K"],
+            yticklabels=["<=50K", ">50K"]
+        )
+
+        plt.title(f"Confusion Matrix - {experiment_name}")
+        plt.xlabel("Predicted class")
+        plt.ylabel("Actual class")
+        plt.tight_layout()
+
+        file_name = make_file_name(experiment_name)
         plt.savefig(
             f"outputs/confusion_matrix_{file_name}.png",
             dpi=300,
             bbox_inches="tight"
         )
-    plt.show()
+
+        plt.show()
 
     report = classification_report(
         y_test,
@@ -50,7 +55,7 @@ def evaluate_model(model, X_test, y_test, experiment_name, save_outputs=True):
     print(report_df.round(4))
 
     if save_outputs:
-        file_name = experiment_name.lower().replace(" ", "_").replace("-", "_")
+        file_name = make_file_name(experiment_name)
         report_df.round(4).to_excel(
             f"outputs/classification_report_{file_name}.xlsx"
         )
@@ -157,10 +162,6 @@ for n in n_estimators_values:
 
     all_results.append(result)
 
-# ============================
-# Experiment 3 - Variația learning_rate
-# ============================
-
 learning_rate_values = [0.01, 0.1, 0.3, 0.5]
 
 for lr in learning_rate_values:
@@ -253,6 +254,7 @@ experiment_3_df[selected_columns].round(4).to_excel(
     index=False
 )
 
+# am ales modelul baseline pt importances, deoarece este cel mai bun din cele analizate
 feature_importances = baseline_model.feature_importances_
 
 importance_df = pd.DataFrame({
